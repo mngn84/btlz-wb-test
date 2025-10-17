@@ -9,24 +9,24 @@ export async function up(knex) {
         table.string('geo_name').notNullable();
         table.date('date').notNullable();
 
-        table.decimal("box_delivery_base").notNullable();
-        table.decimal("box_delivery_coef_expr").notNullable();
-        table.decimal("box_delivery_liter").notNullable();
+        table.decimal("box_delivery_base");
+        table.decimal("box_delivery_coef_expr");
+        table.decimal("box_delivery_liter");
 
-        table.decimal("box_delivery_marketplace_base").notNullable();
-        table.decimal("box_delivery_marketplace_coef_expr").notNullable();
-        table.decimal("box_delivery_marketplace_liter").notNullable();
+        table.decimal("box_delivery_marketplace_base");
+        table.decimal("box_delivery_marketplace_coef_expr");
+        table.decimal("box_delivery_marketplace_liter");
 
-        table.decimal("box_storage_base").notNullable();
-        table.decimal("box_storage_coef_expr").notNullable();
-        table.decimal("box_storage_liter").notNullable();
+        table.decimal("box_storage_base");
+        table.decimal("box_storage_coef_expr");
+        table.decimal("box_storage_liter");
 
-        table.date("dt_next_box").notNullable();
-        table.date("dt_till_max").notNullable();
+        table.date("dt_next_box");
+        table.date("dt_till_max");
 
-        table.timestamp("created_at").defaultTo(knex.fn.now());
         table.timestamp("updated_at").defaultTo(knex.fn.now());
 
+        table.unique(["warehouse_name", "date"]);
     });
 }
 
