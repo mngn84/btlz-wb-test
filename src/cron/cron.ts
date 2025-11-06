@@ -2,28 +2,25 @@ import cron from "node-cron";
 import { getBoxTariffs } from "#services/wb_api.js";
 import { saveBoxTariffs } from '#postgres/services/box_tariffs.js'
 
-async function updateTariffs() {
+async function updateTariffs(fn: () => Promise<void>) {
     try {
-        const today = new Date().toISOString().split("T")[0]
-        const data = await getBoxTariffs(today);
+        const data = await getBoxTariffs();
         if (!data) {
             console.error("WB Tariffs updating error: data is empty");
             return;
         }
 
-        await saveBoxTariffs(data, today);
+        await saveBoxTariffs(data);
+        await fn();
         console.log(`WB Tariffs Updated at ${new Date().toISOString()}`);
     } catch (e) {
         console.error("WB Tariffs updating error: ", e);
     }
 }
 
-const hourlyCron = cron.schedule("0 * * * *", updateTariffs);
-const dailyCron = cron.schedule("0 0 * * *", updateTariffs);
-
-function startCronJobs() {
+function startCronJobs(processSheetsFn: () => Promise<void>) {
+    const hourlyCron = cron.schedule("0 * * * *", () => updateTariffs(processSheetsFn));
     hourlyCron.start();
-    dailyCron.start();
 }
 
 export default startCronJobs;

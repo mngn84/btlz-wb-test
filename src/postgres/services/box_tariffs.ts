@@ -3,12 +3,13 @@ import knex from '../knex.js';
 import type { z, SafeParseReturnType } from "zod";
 type Tariffs = z.infer<typeof tariffsSchema>;
 
-export async function saveBoxTariffs(data: SafeParseReturnType<unknown, Tariffs>, date: string) {
+const today = new Date().toISOString().split("T")[0]
+
+export async function saveBoxTariffs(data: SafeParseReturnType<unknown, Tariffs>) {
     if (!data.success) {
         console.error('Invalid data', data.error);
         return;
     }
-
     const { dtNextBox, dtTillMax, warehouseList } = data.data;
 
     const parseFloat = (s: string) => {
@@ -24,7 +25,7 @@ export async function saveBoxTariffs(data: SafeParseReturnType<unknown, Tariffs>
         const rows = warehouseList.map((w: { warehouseName: any; geoName: any; boxDeliveryBase: string; boxDeliveryCoefExpr: string; boxDeliveryLiter: string; boxDeliveryMarketplaceBase: string; boxDeliveryMarketplaceCoefExpr: string; boxDeliveryMarketplaceLiter: string; boxStorageBase: string; boxStorageCoefExpr: string; boxStorageLiter: string; }) => ({
             warehouse_name: w.warehouseName,
             geo_name: w.geoName,
-            date: date,
+            date: today,
             box_delivery_base: parseFloat(w.boxDeliveryBase),
             box_delivery_coef_expr: parseFloat(w.boxDeliveryCoefExpr),
             box_delivery_liter: parseFloat(w.boxDeliveryLiter),
@@ -59,5 +60,18 @@ export async function saveBoxTariffs(data: SafeParseReturnType<unknown, Tariffs>
             ]);
     } catch (e) {
         console.error('Tariffs saving error: ', e);
+    }
+}
+
+export async function getBoxTariffsFromDb(): Promise<Record<string, string | number | Date>[] | undefined> {
+    try {
+        const rows = await knex('box_tariffs')
+            .where('date', today)
+            .orderBy('box_delivery_coef_expr', 'asc');
+
+        return rows;
+    } catch (e) {
+        console.error('Getting tariffs from db error: ', e);
+        return undefined;
     }
 }

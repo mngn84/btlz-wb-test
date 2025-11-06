@@ -1,14 +1,11 @@
 import { tariffsSchema } from '#schemas/wb_api_schema.js'
 import env from '#config/env/env.js';
 
-export async function getBoxTariffs(date: string) {
-    if (!date) {
-        console.error('Getting tarrifs error: date required !');
-        return;
-    }
+export async function getBoxTariffs() {
+    const today = new Date().toISOString().split("T")[0]
 
     try {
-        const url = `https://common-api.wildberries.ru/api/v1/tariffs/box?date=${date}`;
+        const url = `https://common-api.wildberries.ru/api/v1/tariffs/box?date=${today}`;
         const res = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
